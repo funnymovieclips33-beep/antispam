@@ -6,7 +6,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 
-TOKEN = "ТВОЙ_ТОКЕН"
+TOKEN = "8721489660:AAGbH2wioVZgmPu-qpxVubvvRhjJXRqXrJY"
 CHANNEL_ID = -1003083716539  # твой канал
 
 bot = Bot(token=TOKEN)
