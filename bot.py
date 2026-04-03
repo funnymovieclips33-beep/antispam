@@ -1,5 +1,4 @@
 import re
-import time
 import asyncio
 from collections import defaultdict
 
@@ -17,10 +16,12 @@ ip_messages = defaultdict(list)
 TIME_WINDOW = 60
 MAX_REQUESTS = 5
 
+# 🔍 поиск IP
 def extract_ip(text):
     match = re.search(r"(\d{1,3}(?:\.\d{1,3}){3})", text)
     return match.group(1) if match else None
 
+# ⏳ обработка с задержкой
 async def process_ip(ip):
     print(f"⏳ Ждём {TIME_WINDOW} сек для IP {ip}")
     await asyncio.sleep(TIME_WINDOW)
@@ -38,28 +39,44 @@ async def process_ip(ip):
     else:
         print(f"❌ СПАМ: {ip}")
 
+        # 👉 отправим 1 как подозрительный (чтобы не терять лид)
+        await bot.send_message(
+            chat_id=CHANNEL_ID,
+            text=f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ЛИД (IP: {ip})\n\n{messages[0]}"
+        )
+
     ip_messages[ip] = []
 
+# 🤖 обработка сообщений
 @dp.message()
 async def handle_message(message: Message):
-    text = message.text or ""
+    text = message.text or message.caption or ""
 
     print("📩 Новое сообщение:", text)
 
     ip = extract_ip(text)
     print("🌐 IP:", ip)
 
+    # ❗ если нет IP → сразу лид
     if not ip:
-        print("❌ IP не найден")
+        print("⚠️ Нет IP → сразу отправляем как лид")
+
+        await bot.send_message(
+            chat_id=CHANNEL_ID,
+            text=f"✅ ЛИД (без IP)\n\n{text}"
+        )
         return
 
+    # сохраняем сообщение
     ip_messages[ip].append(text)
     print(f"📦 Сохранили сообщение. Всего: {len(ip_messages[ip])}")
 
+    # если первое — запускаем таймер
     if len(ip_messages[ip]) == 1:
-        print("🚀 Запускаем таймер")
+        print(f"🚀 Запускаем таймер для {ip}")
         asyncio.create_task(process_ip(ip))
 
+# 🚀 запуск
 async def main():
     print("🤖 Bot started...")
     await dp.start_polling(bot)
