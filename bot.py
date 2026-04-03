@@ -1,13 +1,16 @@
 import re
 import time
 from collections import defaultdict
-from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
+import asyncio
+
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message
+from aiogram.filters import Command
 
 TOKEN = "8721489660:AAGbH2wioVZgmPu-qpxVubvvRhjJXRqXrJY"
 
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 ip_logs = defaultdict(list)
 TIME_WINDOW = 60
@@ -27,9 +30,11 @@ def is_spam(ip):
     ip_logs[ip].append(now)
     return False
 
-@dp.message_handler(content_types=types.ContentType.TEXT)
-async def handle_group(message: types.Message):
-    text = message.text
+@dp.message()
+async def handle_message(message: Message):
+    text = message.text or ""
+
+    print("MESSAGE:", text)
 
     ip = extract_ip(text)
 
@@ -37,9 +42,13 @@ async def handle_group(message: types.Message):
         return
 
     if is_spam(ip):
-        await message.react("❌")
+        await message.react([{"type": "emoji", "emoji": "❌"}])
     else:
-        await message.react("✅")
+        await message.react([{"type": "emoji", "emoji": "✅"}])
+
+async def main():
+    print("Bot started...")
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    executor.start_polling(dp)
+    asyncio.run(main())
