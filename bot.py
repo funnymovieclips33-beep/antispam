@@ -16,12 +16,10 @@ ip_messages = defaultdict(list)
 TIME_WINDOW = 60
 MAX_REQUESTS = 5
 
-# 🔍 поиск IP
 def extract_ip(text):
     match = re.search(r"(\d{1,3}(?:\.\d{1,3}){3})", text)
     return match.group(1) if match else None
 
-# ⏳ обработка с задержкой
 async def process_ip(ip):
     print(f"⏳ Ждём {TIME_WINDOW} сек для IP {ip}")
     await asyncio.sleep(TIME_WINDOW)
@@ -46,32 +44,28 @@ async def process_ip(ip):
 
     ip_messages[ip] = []
 
-# 🤖 обработка сообщений
 @dp.message()
 async def handle_message(message: Message):
 
-    # ❗ работаем только в группе
+    # только группа
     if message.chat.type not in ["group", "supergroup"]:
         return
 
-    # ❗ ВАЖНО: обрабатываем сообщения от бота (WP Telegram)
-    if message.from_user and message.from_user.is_bot:
-        print("🤖 Сообщение от бота (WP Telegram)")
-
+    # ✅ ВАЖНО: правильный текст (и text и caption)
     text = message.text or message.caption or ""
 
     print("📩 Новое сообщение:", text)
 
-    if not text.strip():
+    if not text:
         print("❌ Пустое сообщение")
         return
 
     ip = extract_ip(text)
     print("🌐 IP:", ip)
 
-    # ❗ если нет IP → сразу лид
+    # без IP → сразу лид
     if not ip:
-        print("⚠️ Нет IP → сразу отправляем как лид")
+        print("⚠️ Нет IP → отправляем")
 
         await bot.send_message(
             chat_id=CHANNEL_ID,
@@ -79,16 +73,13 @@ async def handle_message(message: Message):
         )
         return
 
-    # сохраняем сообщение
     ip_messages[ip].append(text)
-    print(f"📦 Сохранили сообщение. Всего: {len(ip_messages[ip])}")
+    print(f"📦 Сохранили: {len(ip_messages[ip])}")
 
-    # если первое — запускаем таймер
     if len(ip_messages[ip]) == 1:
-        print(f"🚀 Запускаем таймер для {ip}")
+        print(f"🚀 Таймер старт для {ip}")
         asyncio.create_task(process_ip(ip))
 
-# 🚀 запуск
 async def main():
     print("🤖 Bot started...")
     await dp.start_polling(bot)
