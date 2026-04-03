@@ -6,7 +6,8 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 
-TOKEN = "8721489660:AAGbH2wioVZgmPu-qpxVubvvRhjJXRqXrJY"
+TOKEN = "ТВОЙ_ТОКЕН"
+CHANNEL_ID = -1003083716539  # твой канал
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -33,17 +34,22 @@ def is_spam(ip):
 async def handle_message(message: Message):
     text = message.text or ""
 
-    print("MESSAGE:", text)
-
     ip = extract_ip(text)
 
     if not ip:
         return
 
     if is_spam(ip):
-        await message.reply("❌ СПАМ")
-    else:
-        await message.reply("✅ ЛИД")
+        print(f"❌ СПАМ: {ip}")
+        return  # игнорируем спам
+
+    print(f"✅ ЛИД: {ip}")
+
+    # отправка в канал
+    await bot.send_message(
+        chat_id=CHANNEL_ID,
+        text=text
+    )
 
 async def main():
     print("Bot started...")
