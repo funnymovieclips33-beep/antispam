@@ -5,7 +5,7 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
-from aiogram.filters import Command
+
 TOKEN = "8721489660:AAGbH2wioVZgmPu-qpxVubvvRhjJXRqXrJY"
 
 bot = Bot(token=TOKEN)
@@ -41,9 +41,9 @@ async def handle_message(message: Message):
         return
 
     if is_spam(ip):
-        await message.react([{"type": "emoji", "emoji": "❌"}])
+        await message.reply("❌ СПАМ")
     else:
-        await message.react([{"type": "emoji", "emoji": "✅"}])
+        await message.reply("✅ ЛИД")
 
 async def main():
     print("Bot started...")
