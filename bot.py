@@ -2,7 +2,7 @@ import re
 import asyncio
 from collections import defaultdict
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 
 TOKEN = "8721489660:AAGbH2wioVZgmPu-qpxVubvvRhjJXRqXrJY"
@@ -44,19 +44,21 @@ async def process_ip(ip):
 
     ip_messages[ip] = []
 
-@dp.message()
+# 🔥 ЛОВИМ ВСЁ (включая sender_chat)
+@dp.message(F.text | F.caption)
 async def handle_message(message: Message):
 
     # только группа
     if message.chat.type not in ["group", "supergroup"]:
         return
 
-    # ✅ ВАЖНО: правильный текст (и text и caption)
     text = message.text or message.caption or ""
 
     print("📩 Новое сообщение:", text)
+    print("👤 from_user:", message.from_user)
+    print("📢 sender_chat:", message.sender_chat)
 
-    if not text:
+    if not text.strip():
         print("❌ Пустое сообщение")
         return
 
