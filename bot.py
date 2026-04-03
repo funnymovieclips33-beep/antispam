@@ -39,7 +39,6 @@ async def process_ip(ip):
     else:
         print(f"❌ СПАМ: {ip}")
 
-        # 👉 отправим 1 как подозрительный (чтобы не терять лид)
         await bot.send_message(
             chat_id=CHANNEL_ID,
             text=f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ЛИД (IP: {ip})\n\n{messages[0]}"
@@ -50,9 +49,22 @@ async def process_ip(ip):
 # 🤖 обработка сообщений
 @dp.message()
 async def handle_message(message: Message):
+
+    # ❗ работаем только в группе
+    if message.chat.type not in ["group", "supergroup"]:
+        return
+
+    # ❗ ВАЖНО: обрабатываем сообщения от бота (WP Telegram)
+    if message.from_user and message.from_user.is_bot:
+        print("🤖 Сообщение от бота (WP Telegram)")
+
     text = message.text or message.caption or ""
 
     print("📩 Новое сообщение:", text)
+
+    if not text.strip():
+        print("❌ Пустое сообщение")
+        return
 
     ip = extract_ip(text)
     print("🌐 IP:", ip)
