@@ -43,7 +43,7 @@ async def handle_message(message: Message):
         print(f"❌ СПАМ: {ip}")
         return  # игнорируем спам
 
-    print(f"✅ ЛИД: {ip}")
+    print(f"✅ ЛИД1: {ip}")
 
     # отправка в канал
     await bot.send_message(
