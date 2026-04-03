@@ -50,7 +50,7 @@ async def handle_message(message: Message):
         print(f"❌ СПАМ: {ip}")
         return
 
-    print(f"✅ ЛИД: {ip}")
+    print(f"✅ ЛИДы: {ip}")
 
     try:
         await bot.send_message(
