@@ -49,19 +49,14 @@ async def process_ip(ip):
     ip_messages[ip] = []
 
 # 🔥 ОБРАБОТКА СООБЩЕНИЙ ИЗ КАНАЛА
-@dp.message()
-async def handle_message(message: Message):
-
-    # ❗ работаем только с каналом
-    if message.chat.type != "channel":
-        return
+@dp.channel_post()
+async def handle_channel_post(message: Message):
 
     text = message.text or message.caption or ""
 
     print("📩 Новое сообщение из канала:", text)
 
     if not text.strip():
-        print("❌ Пустое сообщение")
         return
 
     ip = extract_ip(text)
@@ -69,8 +64,6 @@ async def handle_message(message: Message):
 
     # без IP → сразу лид
     if not ip:
-        print("⚠️ Нет IP → отправляем сразу")
-
         await bot.send_message(
             chat_id=TARGET_CHANNEL_ID,
             text=f"✅ ЛИД (без IP)\n\n{text}"
@@ -78,17 +71,6 @@ async def handle_message(message: Message):
         return
 
     ip_messages[ip].append(text)
-    print(f"📦 Сохранили: {len(ip_messages[ip])}")
 
-    # запускаем таймер только один раз
     if len(ip_messages[ip]) == 1:
-        print(f"🚀 Запускаем таймер для {ip}")
         asyncio.create_task(process_ip(ip))
-
-# 🚀 запуск
-async def main():
-    print("🤖 Bot started...")
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
