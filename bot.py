@@ -23,28 +23,37 @@ def extract_ip(text):
     match = re.search(r"(\d{1,3}(?:\.\d{1,3}){3})", text)
     return match.group(1) if match else None
 
-# ⏳ обработка пачки сообщений
 async def process_ip(ip):
     print(f"⏳ Ждём {TIME_WINDOW} сек для IP {ip}")
     await asyncio.sleep(TIME_WINDOW)
 
     messages = ip_messages[ip]
-    print(f"📊 Всего сообщений от {ip}: {len(messages)}")
+    count = len(messages)
 
-    if len(messages) < MAX_REQUESTS:
+    print(f"📊 Всего сообщений от {ip}: {count}")
+
+    # ✅ 1 заявка — норм лид
+    if count == 1:
         print(f"✅ ЛИД: {ip}")
 
         await bot.send_message(
             chat_id=TARGET_CHANNEL_ID,
             text=f"✅ ЛИД (IP: {ip})\n\n{messages[0]}"
         )
-    else:
-        print(f"❌ СПАМ: {ip}")
+
+    # ⚠️ 2-4 — подозрительный
+    elif 2 <= count < 5:
+        print(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ: {ip}")
 
         await bot.send_message(
             chat_id=TARGET_CHANNEL_ID,
-            text=f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ЛИД (IP: {ip})\n\n{messages[0]}"
+            text=f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ЛИД (IP: {ip}, заявок: {count})\n\n{messages[0]}"
         )
+
+    # ❌ 5+ — полностью игнорируем
+    else:
+        print(f"❌ СПАМ (ИГНОР): {ip}")
+        # ничего не отправляем
 
     ip_messages[ip] = []
 
