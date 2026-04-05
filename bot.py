@@ -42,7 +42,7 @@ async def process_ip(ip):
         )
 
     # ⚠️ 2-4 — подозрительный
-    elif 2 <= count < 5:
+    elif 2 <= count < 4:
         print(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ: {ip}")
 
         await bot.send_message(
@@ -50,7 +50,7 @@ async def process_ip(ip):
             text=f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ЛИД (IP: {ip}, заявок: {count})\n\n{messages[0]}"
         )
 
-    # ❌ 5+ — полностью игнорируем
+    # ❌ 4+ — полностью игнорируем
     else:
         print(f"❌ СПАМ (ИГНОР): {ip}")
         # ничего не отправляем
